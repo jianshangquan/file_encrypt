@@ -70,7 +70,7 @@ class Encryptor {
     outputStream.add(extBytes);
 
     // add extenstions for 255bytes
-    final fileNameBytes = generateByteSpaceWithString(FILENAME_BYTE, inputFileName);
+    final fileNameBytes = generateByteSpaceWithString(FILENAME_BYTE, Uri.encodeComponent(inputFileName));
     outputStream.add(fileNameBytes);
 
     int offset = 0;
@@ -117,7 +117,7 @@ class Decryptor {
     final version = int.parse(utf8.decode(metadata.range(0, VERSION_BYTE).where((byte) => byte != 0).toList()));
     final password = utf8.decode(metadata.range(VERSION_BYTE, PASSWORD_BYTE).where((byte) => byte != 0).toList());
     final extenstion = utf8.decode(metadata.range(VERSION_BYTE + PASSWORD_BYTE, EXTENSTIONS_BYTE).where((byte) => byte != 0).toList());
-    final fileName = utf8.decode(metadata.range(VERSION_BYTE + PASSWORD_BYTE + EXTENSTIONS_BYTE, FILENAME_BYTE).where((byte) => byte != 0).toList());
+    final fileName = Uri.decodeComponent(utf8.decode(metadata.range(VERSION_BYTE + PASSWORD_BYTE + EXTENSTIONS_BYTE, FILENAME_BYTE).where((byte) => byte != 0).toList()));
 
     if (version < CURRENT_VERSION) throw Exception("The file that you encrypted with older version, please use lates update of version or decrypt it with same version");
     if (password != algorithm.getPasswordHash()) throw Exception("Invalid password");
