@@ -1,38 +1,73 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dart_file_encrypt/algorithm/own_algorithm.dart';
-import 'package:dart_file_encrypt/algorithm/own_binary_reverse_algorithm.dart';
 import 'package:dart_file_encrypt/own_file_encrypt.dart';
+import 'dart:io' show Platform;
+import 'package:path/path.dart' as p;
 
 Future<void> main(List<String> arguments) async {
-  String password = '349276185';
-  String inputFilePath = "/Users/jianshangquan/App Developemnt/Experiment projects/dart_file_encrypt/test-file/video.mp4";
-  String outputEncryptedPath = "/Users/jianshangquan/App Developemnt/Experiment projects/dart_file_encrypt/test-file/";
-  String outputDecryptedPath = "/Users/jianshangquan/App Developemnt/Experiment projects/dart_file_encrypt/test-file/";
-  OwnAlgorithm algorithm = OwnBinaryReverseAlgorithm(password: password);
+  String currentDirPath = p.dirname(Platform.script.toString()).replaceAll("file:/", "");
 
-  // await Encryptor.encryptFile(
-  //   inputFilePath: inputFilePath,
-  //   outPath: outputEncryptedPath,
-  //   algorithm: algorithm,
-  //   onProgressing: (offset, total) {
-  //     stdout.write('\rEncrypting : ${((offset / total) * 100).toStringAsFixed(0)}%');
-  //   },
-  // );
+  // String password = '349276185';
+  // String inputFilePath = "/Users/jianshangquan/App Developemnt/Experiment projects/dart_file_encrypt/test-file/video.mp4";
+  // String outputEncryptedPath = "/Users/jianshangquan/App Developemnt/Experiment projects/dart_file_encrypt/test-file/";
+  // String outputDecryptedPath = "/Users/jianshangquan/App Developemnt/Experiment projects/dart_file_encrypt/test-file/";
+  // OwnAlgorithm algorithm = OwnBinaryReverseAlgorithm(password: password);
 
-  // // print('decrypting');
-  await Decryptor.decryptFile(
-    filePath: '$outputEncryptedPath/video.encrypted',
-    outPath: outputDecryptedPath,
-    algorithm: algorithm,
-    onProgressing: (offset, total) {
-      stdout.write('\rDecrypting : ${((offset / total) * 100).toStringAsFixed(0)}%');
-    },
-  );
+  String? password;
+  String? inputFilePath;
+  String? outputPath;
+  String? algorithmName;
 
-  // print(algorithm.getPasswordHash());
-  // print(utf8.decode('43bddaa4978d9e5cb46c93d85f83c4b1f193a3aaf068cca22f6c0b1d1a5e5d98'.codeUnits));
-  // print('155904ef5ae392928442ef77f5fc2c73c4b4258ec2ec76f7a466d50d40d384a9'.length);
+  const keys = ['-i', '-o', '-p', '-a'];
+  for (var i = 0; i < arguments.length; i++) {
+    final arg = arguments[i];
+    if (keys.contains(arg)) {
+      final value = arguments[i + 1];
+      i++;
+      if (arg == '-i') {
+        inputFilePath = p.normalize(p.join(currentDirPath, value));
+      }
+      if (arg == '-o') {
+        outputPath = p.normalize(p.join(currentDirPath, value));
+      }
+      if (arg == '-p') {
+        password = value;
+      }
+      if (arg == '-a') {
+        algorithmName = value;
+      }
+    }
+  }
+
+  if (inputFilePath == null) throw Exception('Input file path required, add "-i <input path>" in you command');
+  if (outputPath == null) throw Exception('Output folder path required, add "-o <output folder>" in your command');
+  if (password == null) throw Exception('Password required, add "-p <your password>" in your command');
+
+  bool isEncrypt = p.extension(inputFilePath) != '.encrypted';
+  OwnAlgorithm algorithm = OwnAlgorithm.fromName(algorithmName ?? '', password) ?? OwnAlgorithm.defaultAlgorithm(password);
+
+  try {
+    if (isEncrypt) {
+      await Encryptor.encryptFile(
+        inputFilePath: Uri.decodeComponent(inputFilePath),
+        outPath: Uri.decodeComponent(outputPath),
+        algorithm: algorithm,
+        onProgressing: (offset, total) {
+          stdout.write('\rEncrypting : ${((offset / total) * 100).toStringAsFixed(1)}%');
+        },
+      );
+    } else {
+      await Decryptor.decryptFile(
+        filePath: Uri.decodeComponent(inputFilePath),
+        outPath: Uri.decodeComponent(outputPath),
+        algorithm: algorithm,
+        onProgressing: (offset, total) {
+          stdout.write('\rDecrypting : ${((offset / total) * 100).toStringAsFixed(1)}%');
+        },
+      );
+    }
+  } catch (e) {
+    print(e);
+  }
 }

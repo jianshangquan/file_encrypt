@@ -51,6 +51,7 @@ class Encryptor {
     final inputFileStat = await inputFile.stat();
 
     final outputFile = File(p.join(outPath, '$inputFileName.encrypted'));
+    outputFile.createSync(recursive: true);
 
     final Stream<List<int>> inputStream = inputFile.openRead();
     final IOSink outputStream = outputFile.openWrite();
@@ -123,6 +124,7 @@ class Decryptor {
 
     final fileFullName = '$fileName$extenstion';
     final outputFile = File('$outPath/$fileFullName');
+    outputFile.createSync(recursive: true);
 
     final IOSink outputStream = outputFile.openWrite();
     final completer = Completer();

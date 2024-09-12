@@ -10,6 +10,9 @@ class OwnAesAlgorithm extends OwnAlgorithm {
   OwnAesAlgorithm({required super.password});
 
   @override
+  static String get name => 'AES';
+
+  @override
   Uint8List decrypt(Uint8List data) {
     // TODO: implement decrypt
     throw UnimplementedError();

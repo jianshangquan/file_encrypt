@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:test/test.dart';
 
 void main() {
@@ -6,4 +8,6 @@ void main() {
   // });
 
   // encrypt("/../text-file/test.txt");
+
+  print(utf8.encode('ABC'));
 }
