@@ -1,0 +1,3 @@
+[submodule "HomeBrew-file-encrypt"]
+	path = ./dist/HomeBrew/HomeBrew-file-encrypt
+	url = https://github.com/jianshangquan/HomeBrew-file-encrypt
